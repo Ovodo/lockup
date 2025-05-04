@@ -1,6 +1,5 @@
 "use client";
 import All from "@/components/notification/All";
-import NotificationItem from "@/components/NotificationItem";
 import Image from "next/image";
 import React, { useState } from "react";
 
