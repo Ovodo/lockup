@@ -34,7 +34,7 @@ const clientConfig = clientConfigSchema.parse({
   APP_ID: process.env.NEXT_PUBLIC_APP_ID!,
   VAULT: process.env.NEXT_PUBLIC_VAULT!,
   CLOCK_ID: process.env.NEXT_PUBLIC_CLOCK_ID!,
-  REDIRECT_URI: `${process.env.NEXTAUTH_URI}/auth`,
+  REDIRECT_URL: `${process.env.NEXTAUTH_URI}/auth`,
   MASTER_SEED: "tricodelockup", // Replace with a securely stored master seed
 });
 
