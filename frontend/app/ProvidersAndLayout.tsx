@@ -73,7 +73,7 @@ export const ProvidersAndLayout = ({ children }: ChildrenProps) => {
               <main className="min-h-screen  relative flex flex-col">
                 {children}
                 <Toaster duration={2000} />
-                <Toast position="bottom-left" />
+                <Toast position="top-left" />
                 <Analytics />
               </main>
             </Providers>

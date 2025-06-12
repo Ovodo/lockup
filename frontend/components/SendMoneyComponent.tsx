@@ -26,6 +26,11 @@ const SendMoneyComponent: React.FC = () => {
   const [receiveCountryError, setReceiverCountryError] = useState(false);
   const [senderCountryError, setSenderCountryError] = useState(false);
   const [amountError, setAmountError] = useState(false);
+  const [paymentChannel, setPaymentChannel] = useState<string>("");
+  const [paymentChannelError, setPaymentChannelError] = useState(false);
+  const [bankDetails, setBankDetails] = useState<string>("");
+  const [bankDetailsError, setBankDetailsError] = useState(false);
+
   const { lexend } = useFonts();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -70,9 +75,25 @@ const SendMoneyComponent: React.FC = () => {
     if (!sendAmount) {
       setAmountError(true);
     }
+    if (!paymentChannel) {
+      setPaymentChannelError(true);
+    }
+    if (!bankDetails) {
+      setBankDetailsError(true);
+    }
 
-    if (senderCountryError || receiveCountryError || amountError) {
-      console.log("fjs");
+    if (
+      senderCountryError || 
+      receiveCountryError || 
+      amountError || 
+      paymentChannelError || 
+      bankDetailsError || 
+      !sendersCountry || 
+      !receiversCountry || 
+      !sendAmount || 
+      !paymentChannel || 
+      !bankDetails
+    ) {
       return;
     }
 
@@ -91,6 +112,8 @@ const SendMoneyComponent: React.FC = () => {
         senderCountry: sendersCountry?.alpha3 as string,
         receiverCountry: receiversCountry?.alpha3 as string,
         sendAmountSui: parseFloat(sendAmountSui),
+        paymentChannel: paymentChannel,
+        bankDetails: bankDetails,
       };
 
       dispatch(setSlip(slip));
@@ -199,7 +222,7 @@ const SendMoneyComponent: React.FC = () => {
             </p>
           )}
         </div>
-        <div className="flex w-full flex-col">
+        <div className="flex w-full mb-5 flex-col">
           <div className="flex w-full gap-2  items-center mt-5 ">
             <div className="">
               <label className="block text-sm font-medium text-header_black mb-2">
@@ -249,6 +272,53 @@ const SendMoneyComponent: React.FC = () => {
           {amountError && (
             <p className="text-xs text-error mt-1">
               Please select an amount to send
+            </p>
+          )}
+        </div>
+        <div className="mb-5 relative">
+          <SelectComponent
+            error={paymentChannelError}
+            style="z-50 "
+            labelStyles="block text-sm font-medium text-header_black mb-[10px]"
+            label="How does your receiver want the money?"
+            onChange={(val) => {
+              setPaymentChannelError(false);
+              setPaymentChannel(val.value);
+            }}
+            items={[
+              { value: "Bank Transfer", name: "Bank Transfer" },
+              { value: "Paypal", name: "Paypal" },
+              { value: "Google Pay", name: "Google Pay" },
+              { value: "Apple Pay", name: "Apple Pay" },
+            ]}
+            placeholder="Select Payment Channel"
+            countries={false}
+          />
+          {paymentChannelError && (
+            <p className="text-xs text-error mt-1">
+              Please select a payment channel
+            </p>
+          )}
+        </div>
+
+        <div className="mb-5 relative">
+          <label className="block text-sm font-medium text-header_black mb-[10px]">
+            Enter Bank Account Details
+          </label>
+          <textarea
+            value={bankDetails}
+            onChange={(e) => {
+              setBankDetailsError(false);
+              setBankDetails(e.target.value);
+            }}
+            placeholder="Enter account number, bank name, and any other required details"
+            className={`w-full h-[120px] p-4 bg-[#fafafa] border ${
+              bankDetailsError ? "border-error" : "border-border"
+            } rounded-md text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none`}
+          />
+          {bankDetailsError && (
+            <p className="text-xs text-error mt-1">
+              Please enter bank account details
             </p>
           )}
         </div>

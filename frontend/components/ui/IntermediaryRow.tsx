@@ -59,11 +59,11 @@ const IntermediaryRow = ({ item }: { item: Intermediary }) => {
         </div>
       </div>
       <p className="text-[#1b1b1b] hidden  lg:flex items-center justify-center">
-        {item?.paymentChannel}
+        {item?.payments[0].modeOfPayment}
       </p>
       <div className=" flex flex-col  justify-center items-end gap-3">
         <p className="text-[#1b1b1b]  flex lg:hidden items-center justify-center">
-          {item?.paymentChannel}
+          {item?.payments[0].modeOfPayment}
         </p>
         <AppButton
           style="text-white text-xs h-[42px] w-max"

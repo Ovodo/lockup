@@ -17,8 +17,9 @@ const SelectComponent = ({
   onChange,
   countries,
   error,
-  def,
+  def = "",
   zIndex,
+  defCountry,
 }: {
   items: any[];
   label: string;
@@ -30,8 +31,10 @@ const SelectComponent = ({
   onChange: (e: any) => void;
   zIndex?: number;
   def?: string;
+  defCountry?: string;
 }) => {
   // --------------------------------------------VARIABLES
+  // console.log(items, "items");
 
   const [open, setOpen] = useState(false);
   const [value, setVal] = useState<any>(null);
@@ -100,13 +103,16 @@ const SelectComponent = ({
   }, [open, search]);
 
   useEffect(() => {
-    if (def) {
-      const country = counts.all.find((item) => item.name == def);
+    if (!def || !defCountry) {
+      setVal(null);
+    }
+    if (defCountry) {
+      const country = counts.all.find((item) => item.name == defCountry);
       if (country) {
         setVal(country);
       }
     }
-  }, [def]);
+  }, [defCountry]);
   // console.log(value, def);
   return (
     <OutsideClickHandler
@@ -225,8 +231,20 @@ const SelectComponent = ({
             )}
           </AnimatePresence>
 
-          {!value ? (
-            <p className={`${!value && "font-light"} px-5`}>{placeholder}</p>
+          {def !== "" ? (
+            <div className="flex items-center gap-[10px] pl-[14px] w-full">
+              <Image
+                src={"/assets/icons/tick-circle.svg"}
+                width={14}
+                height={14}
+                alt="tick"
+              />
+              <p className="font-medium">{def}</p>
+            </div>
+          ) : value === null ? (
+            <p className={`${value === null && "font-light"} px-5`}>
+              {placeholder}
+            </p>
           ) : (
             <div className="flex items-center gap-[10px] pl-[14px] w-full">
               {countries ? (

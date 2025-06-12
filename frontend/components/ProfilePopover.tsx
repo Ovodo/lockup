@@ -19,7 +19,7 @@ import { ExternalLink } from "lucide-react";
 import { useContext, useEffect } from "react";
 import { Transaction } from "@mysten/sui/transactions";
 import clientConfig from "@/config/clientConfig";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   useConnectWallet,
   useCurrentAccount,
@@ -33,6 +33,7 @@ import { LoginContextType } from "@/types/todo";
 
 export default function ProfilePopover() {
   const router = useRouter();
+  const pathname = usePathname();
   const { login, address, logout } = useContext(
     LoginContext
   ) as LoginContextType;
@@ -57,7 +58,8 @@ export default function ProfilePopover() {
 
         // const res = await executeTransactionBlockWithoutSponsorship({
         //   tx: txb,
-        //   options: {
+        //   options: {    new Map<AuthProvider, EnokiWallet>()
+
         //     showEffects: true,
         //     showObjectChanges: true,
         //   },
@@ -66,7 +68,7 @@ export default function ProfilePopover() {
     };
 
     if (address) {
-      router.push("/dashboard");
+      pathname === "/" ? router.push("/dashboard") : null;
       // window.location.href = "/dashboard";
     }
     console.log("connected", address);

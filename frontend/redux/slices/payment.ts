@@ -6,6 +6,8 @@ export type Slip = {
   receiverCountry: string;
   receiverAmount: number;
   sendAmountSui: number;
+  paymentChannel?: string;
+  bankDetails?: string;
 };
 
 const initialState = {
@@ -25,6 +27,8 @@ export const section = createSlice({
       state.receiverAmount = action.payload.receiverAmount;
       state.receiverCountry = action.payload.receiverCountry;
       state.sendAmountSui = action.payload.sendAmountSui;
+      state.paymentChannel = action.payload.paymentChannel;
+      state.bankDetails = action.payload.bankDetails;
     },
     resetSlip: (state) => {
       state = initialState;

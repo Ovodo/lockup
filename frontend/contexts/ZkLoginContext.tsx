@@ -8,7 +8,7 @@ import {
   getExtendedEphemeralPublicKey,
   genAddressSeed,
   getZkLoginSignature,
-} from "@mysten/zklogin";
+} from "@mysten/sui/zklogin";
 import { SuiClient, SuiTransactionBlockResponse } from "@mysten/sui/client";
 import { Transaction } from "@mysten/sui/transactions";
 
@@ -17,6 +17,7 @@ import { jwtDecode } from "jwt-decode";
 import { generateUserSalt, PartialZkLoginSignature } from "@/lib/utils";
 import { networkConfig } from "@/config/networkConfig";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const suiClient = new SuiClient({ url: networkConfig.devnet.url });
 
@@ -30,11 +31,16 @@ const LoginProvider: React.FC<{ children: React.ReactNode }> = ({
   const [address, setAddress] = useState<string | null>(null);
   const [zkProofResult, setZkProofResult] = useState<any>(null); // Store the zkProof result
   const keyPair = new Ed25519Keypair();
+  const router = useRouter();
 
   useEffect(() => {
     const storedAddress = window.sessionStorage.getItem("address");
     const storedJwt = window.sessionStorage.getItem("jwt");
-    if (storedAddress) setAddress(storedAddress);
+    if (storedAddress) {
+      setAddress(storedAddress);
+    } else {
+      router.push("/");
+    }
     if (storedJwt) setJwt(storedJwt);
   }, []);
 
@@ -163,11 +169,14 @@ const LoginProvider: React.FC<{ children: React.ReactNode }> = ({
         signer: ephemeralKeyPair,
       });
 
+      const partialProof = JSON.parse(
+        partialZkLoginSignature as string
+      ) as PartialZkLoginSignature;
       const zkLoginSignature = getZkLoginSignature({
         inputs: {
-          ...(JSON.parse(
-            partialZkLoginSignature as string
-          ) as PartialZkLoginSignature),
+          proofPoints: partialProof.proofPoints,
+          issBase64Details: partialProof.issBase64Details,
+          headerBase64: partialProof.headerBase64,
           addressSeed,
         },
         maxEpoch: epoch as unknown as number,

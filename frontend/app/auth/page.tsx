@@ -6,7 +6,7 @@ import { jwtDecode } from "jwt-decode";
 import { LoginContext } from "@/contexts/ZkLoginContext";
 import { JwtPayload, LoginContextType } from "@/types/todo";
 import { generateUserSalt } from "@/lib/utils";
-import { jwtToAddress } from "@mysten/zklogin";
+import { jwtToAddress } from "@mysten/sui/zklogin";
 import clientConfig from "@/config/clientConfig";
 
 export default function Page() {

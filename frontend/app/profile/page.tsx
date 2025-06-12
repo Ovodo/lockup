@@ -6,10 +6,16 @@ import AppButton from "@/components/ui/AppButton";
 import WhiteBackground from "@/components/WhiteBackground";
 import { countries, Country } from "country-data";
 import PaymentDetails from "@/components/PaymentDetails";
+import {
+  Intermediary,
+  PaymentDetails as PaymentDetailsType,
+} from "@/types/Intermediary";
 import { LoginContext } from "@/contexts/ZkLoginContext";
 import { LoginContextType } from "@/types/todo";
 import {
+  addPayment,
   getIntermediary,
+  removePayment,
   updatePersonalDetails,
 } from "@/actions/intermediaries";
 import toast from "react-hot-toast";
@@ -22,8 +28,19 @@ const steps = [
 
 export default function Home() {
   // State for payment channels
-  const [intermediary, setIntermediary] = useState<any>(null);
-  const [payments, setPayments] = useState(["1"]);
+  const [intermediary, setIntermediary] = useState<Intermediary | null>(null);
+  const [payment, setPayment] = useState<PaymentDetailsType>({
+    currency: "",
+    amount: "",
+    bank: "",
+    bankCode: 0,
+    accountName: "",
+    accountNumber: "",
+    modeOfPayment: "",
+  });
+  const [payments, setPayments] = useState<PaymentDetailsType[]>(
+    intermediary?.payments || []
+  );
   const [suiWallet, setSuiWallet] = useState("");
   const [fullName, setFullName] = useState("");
   const [country, setCountry] = useState<Country>();
@@ -35,15 +52,34 @@ export default function Home() {
   const [senderCountryError, setSenderCountryError] = useState(false);
 
   const active = true;
-  const addNewCurrency = () => {
-    // Calculate the next number to add to the payments array
-    const nextNumber = (payments.length + 1).toString();
-    setPayments([...payments, nextNumber]);
+  // Add new payment and update intermediary's payments in DB
+  const addNewCurrency = async () => {
+    if (address) {
+      const res = await addPayment(address as string, payment);
+      if (res.ok) {
+        await fetchIntermediary();
+        toast.success(res.message as string);
+      }
+      if (res.exist) {
+        toast.error("Payment already exists");
+      } else if (res.ok == false) {
+        toast.error("Database Error");
+      }
+    }
   };
 
-  // Function to remove a specific currency by its value
-  const removeCurrency = (item: string) => {
-    setPayments(payments.filter((payment) => payment !== item));
+  // Function to remove a specific payment by index
+  const removeCurrency = async (index: number) => {
+    const paymentToRemove = payments[index];
+    if (!address || !paymentToRemove) return;
+
+    const res = await removePayment(address, paymentToRemove);
+    if (res.ok) {
+      await fetchIntermediary();
+      toast.success(res.message || "Payment removed successfully");
+    } else {
+      toast.error(res.message || "Failed to remove payment");
+    }
   };
 
   const nextStep = async (item: string) => {
@@ -79,26 +115,56 @@ export default function Home() {
     setStep(1);
   };
 
-  console.log(intermediary?.country, intermediary, "coun");
+  console.log(intermediary, "intermediary");
+  const fetchIntermediary = async () => {
+    const res = await getIntermediary(address as string);
+    if (res?.ok) {
+      setIntermediary(res.data as unknown as Intermediary);
+      setFullName(res?.data?.name);
+      const country = countries.all.find(
+        (item) => item.name == res?.data?.country
+      );
+      if (country) {
+        setCountry(country);
+      }
+      // Initialize payments from DB if available, else default to one empty object
+      if (Array.isArray(res?.data?.payments) && res.data.payments.length > 0) {
+        setPayments([
+          ...res.data.payments,
+          {
+            currency: "",
+            amount: "",
+            bank: "",
+            bankCode: 0,
+            accountName: "",
+            accountNumber: "",
+            modeOfPayment: "",
+          },
+        ]);
+      } else {
+        setPayments([
+          {
+            currency: "",
+            amount: "",
+            bank: "",
+            bankCode: 0,
+            accountName: "",
+            accountNumber: "",
+            modeOfPayment: "",
+          },
+        ]);
+      }
+    }
+  };
 
   useEffect(() => {
     if (!address) {
       window.location.href = "/";
     }
-    (async () => {
-      const res = await getIntermediary(address as string);
-      if (res?.ok) {
-        setIntermediary(res.data);
-        setFullName(res?.data?.name);
-        const country = countries.all.find(
-          (item) => item.name == res?.data?.country
-        );
-        if (country) {
-          setCountry(country);
-        }
-      }
-    })();
-  }, [address]);
+    fetchIntermediary();
+  }, [address, step]);
+
+  console.log(payments, "payments");
   return (
     <div className="min-h-screen pb-[224px]  w-full bg-blue-50 flex flex-col justify-start items-center">
       {/* Intermediary 1 */}
@@ -171,7 +237,7 @@ export default function Home() {
               </div>
               <SelectComponent
                 error={senderCountryError}
-                def={intermediary?.country}
+                defCountry={intermediary?.country}
                 style="z-50 w-[60%]"
                 labelStyles="block text-[#212529] text-base font-bold mb-2.5"
                 label="Country of Residence"
@@ -208,11 +274,27 @@ export default function Home() {
               Amount you can Send
             </h6>
             <div className="border-[#EBECE6] w-[65%] p-5 flex flex-col gap-4 border-[1px] rounded-[4px] h-max">
-              {payments.map((item, index) => (
+              {payments.map((payment, index) => (
                 <PaymentDetails
-                  remove={removeCurrency}
-                  key={index.toString()}
-                  item={item}
+                  key={index}
+                  item={payment}
+                  index={index}
+                  length={payments.length}
+                  remove={() => removeCurrency(index)}
+                  setPayment={(updatedPayment) => {
+                    // Update the specific payment item in the payments array
+                    const newPayments = [...payments];
+                    if (typeof updatedPayment === "function") {
+                      // Handle functional updates
+                      newPayments[index] = updatedPayment(payment);
+                    } else {
+                      // Handle object updates
+                      newPayments[index] = updatedPayment as PaymentDetailsType;
+                    }
+                    setPayments(newPayments);
+                    // Also update the current payment state
+                    setPayment(newPayments[index]);
+                  }}
                 />
               ))}
             </div>
