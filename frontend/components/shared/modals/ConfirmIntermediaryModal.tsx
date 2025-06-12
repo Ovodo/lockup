@@ -45,7 +45,7 @@ const ConfirmIntermediaryModal = ({
   const dispatch = useAppDispatch();
 
   const searchParams = useSearchParams();
-  const id = searchParams.get("id") as string;
+  const id = searchParams?.get("id") as string;
 
   //-----------------------------------------------------------FUNCTIONS
   console.log(address, "address");

@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { JwtPayload } from "jwt-decode";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { getZkLoginSignature } from "@mysten/zklogin";
+import { getZkLoginSignature } from "@mysten/sui/zklogin";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

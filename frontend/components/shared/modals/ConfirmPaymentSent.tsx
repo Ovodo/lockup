@@ -24,7 +24,7 @@ const ConfirmPaymentSent = () => {
   const { activeTransaction } = useAppSelector((state) => state.transactions);
 
   const searchParams = useSearchParams();
-  const id = searchParams.get("id") as string;
+  const id = searchParams?.get("id") as string;
 
   //-----------------------------------------------------------FUNCTIONS
 

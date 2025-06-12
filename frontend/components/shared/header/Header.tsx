@@ -46,7 +46,7 @@ const Header = () => {
     <div
       style={sand.style}
       className={`${
-        path == "/" || path.includes("auth") ? "hidden" : "flex"
+        path == "/" || path?.includes("auth") ? "hidden" : "flex"
       } justify-between items-center h-[10.24svh] w-full px-12 border-b border-[#DCDCDC]`}
     >
       {/* Logo Section */}
